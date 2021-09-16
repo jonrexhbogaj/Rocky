@@ -1,11 +1,11 @@
 ﻿@model Rocky.Models.Category
 
-<form method="post" asp-action="Create">
+<form method="post" >
     <div class="border p-3">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input asp-for="Id" hidden/>
 
         <div class="form-group row">
-            <h2 class="text-info pl-3">Add category</h2>
+            <h2 class="text-info pl-3">Edit category</h2>
         </div>
         <div class="row">
             <div class="col-8">
@@ -24,7 +24,7 @@
                         <label asp-for="DisplayOrder"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="DisplayOrder" class="form-control" />
+                        <input asp-for="DisplayOrder" class="form-control"/>
                         <span asp-validation-for="DisplayOrder" class="text-danger"></span>
                     </div>
 
@@ -33,7 +33,7 @@
                     <div class="col-8 offset-4 row">
 
                         <div class="col">
-                            <input type="submit" class="btn btn-info w-100" value="Create"/>
+                            <input type="submit" class="btn btn-info w-100" value="Update"/>
                         </div>
                         <div class="col">
                             <a asp-action="Index" class="btn btn-success w-100">
@@ -56,7 +56,8 @@
 
 @section Scripts
 {
-    
-    @{ <partial name="_ValidationScriptsPartial"/>}
+
+    @{
+        <partial name="_ValidationScriptsPartial" />}
 }
 
