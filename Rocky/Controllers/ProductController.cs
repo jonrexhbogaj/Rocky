@@ -28,13 +28,15 @@ namespace Rocky.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> objList = _db.Product;
+            IEnumerable<Product> objList = _db.Product.Include(u=>u.Category).Include(u=>u.ApplicationType);
 
-            foreach (var obj in objList)
+            //foreach (var obj in objList)
 
-            {
-                obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
-            }
+            //{
+            //    obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId);
+            //    obj.ApplicationType = _db.ApplicationType.FirstOrDefault(u => u.Id == obj.ApplicationTypeId);
+
+            //}
 
 
             return View(objList);
@@ -67,6 +69,12 @@ namespace Rocky.Controllers
 
                     Text = i.Name,
                     Value = i.Id.ToString()
+                }),
+                ApplicationTypeSelectList = _db.ApplicationType.Select(i => new SelectListItem
+                {
+
+                    Text = i.Name,
+                    Value = i.Id.ToString()
                 })
 
             };
@@ -76,6 +84,7 @@ namespace Rocky.Controllers
                 //this is for create 
                 return View(productVM);
             }
+
             else
             {
                 productVM.Product = _db.Product.Find(id);
@@ -83,9 +92,7 @@ namespace Rocky.Controllers
                 {
                     return NotFound();
                 }
-
                 return View(productVM);
-
             }
             
         }
@@ -117,9 +124,6 @@ namespace Rocky.Controllers
 
                     _db.Product.Add(productVM.Product);
 
-
-
-
                 }
 
 
@@ -141,8 +145,6 @@ namespace Rocky.Controllers
                             System.IO.File.Delete(oldFile);
                         }
 
-
-
                         using (var fileStream =
                             new FileStream(Path.Combine(upload, fileName + extension), FileMode.Create))
                         {
@@ -150,7 +152,6 @@ namespace Rocky.Controllers
                         }
 
                         productVM.Product.Image = fileName + extension;
-
 
                     }
                     else
@@ -173,6 +174,12 @@ namespace Rocky.Controllers
                 Text = i.Name,
                 Value = i.Id.ToString()
             });
+            productVM.ApplicationTypeSelectList = _db.ApplicationType.Select(i => new SelectListItem
+            {
+
+                Text = i.Name,
+                Value = i.Id.ToString()
+            });
 
             return View(productVM);
 
@@ -187,30 +194,42 @@ namespace Rocky.Controllers
                 return NotFound();
 
             }
+            Product product= _db.Product.Include(u=>u.Category).Include(u=>u.ApplicationType).FirstOrDefault(u=>u.Id==id);
+            //product.Category = _db.Category.Find(product.CategoryId);
 
-            var obj = _db.Category.Find(id);
-            if (obj == null)
+
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(obj);
+            return View(product);
         }
 
         //POST - Delete 
-        [HttpPost]
+        [HttpPost,ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
         {
-            var obj = _db.Category.Find(id);
+            var obj = _db.Product.Find(id);
 
             if (obj == null)
             {
 
                 return NotFound();
             }
-            
-            _db.Category.Remove(obj);
+
+            string upload = _webHostEnvironment.WebRootPath + WC.ImagePath;
+
+            var oldFile = Path.Combine(upload, obj.Image);
+
+            if (System.IO.File.Exists(oldFile))
+            {
+                System.IO.File.Delete(oldFile);
+            }
+
+
+            _db.Product.Remove(obj);
             _db.SaveChanges();
             return RedirectToAction("Index");
             
